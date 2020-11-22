@@ -6,27 +6,17 @@
 package controller;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Product;
-import service.productService;
 
 /**
  *
  * @author macbookpro
  */
-public class listServlet extends HttpServlet {
+public class logOutServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -44,10 +34,10 @@ public class listServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet listServlet</title>");            
+            out.println("<title>Servlet logOutServlet</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet listServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet logOutServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -65,34 +55,8 @@ public class listServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            
-            List<Product> list = productService.getAllProduct();
-            request.setAttribute("list", list);
-            request.getRequestDispatcher("listProduct.jsp").forward(request, response);
-            request.getSession().removeAttribute("message");
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-//            HashMap<String, Integer> sendToClient = new HashMap<String, Integer>();
-//            sendToClient.put("listAllProduct", 0);
-//             Socket socket = new Socket("localhost", 9000);
-//            ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
-//            ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
-//            
-//            // to TCP Server 
-//            os.writeObject(sendToClient);
-//        try {
-//            // receive from Server
-//            List<Product> list = (List<Product>) is.readObject();
-//            request.setAttribute("list", list);
-//            request.getRequestDispatcher("listProduct.jsp").forward(request, response);
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        request.getSession().removeAttribute("role");
+        response.sendRedirect("listServlet");
     }
 
     /**
@@ -106,7 +70,7 @@ public class listServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response);
+        processRequest(request, response);
     }
 
     /**

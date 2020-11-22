@@ -146,7 +146,18 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="card">
                         
-                    
+                        <c:choose>
+                            <c:when test="${sessionScope.role != null}">
+                                <div class="header">
+                                    <a style="margin-left:90%" href="logOutServlet" class="btn btn-success waves-effect">Log Out</a>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="header">
+                                    <a style="margin-left:5%" href="loginServlet" class="btn btn-success waves-effect">Login</a>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                         <div class="body table-responsive">
                             <table class="table table-bordered table-striped">
                                 <thead class="btn-success">
@@ -215,7 +226,8 @@
                var avai = document.getElementById("messagesError").textContent;
                var check1 = avai.localeCompare("Add Success");
                var check2 = avai.localeCompare("Update Success");
-               if (check1==0 || check2==0) alert(avai); 
+               var check3 = avai.localeCompare("Delete Success");
+               if (check1==0 || check2==0 || check3 == 0 ) alert(avai); 
                     //alert("${message}");
            }
 </script>

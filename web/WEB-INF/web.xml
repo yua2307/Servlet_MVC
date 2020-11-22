@@ -28,6 +28,10 @@
         <servlet-name>addCategoryServlet</servlet-name>
         <servlet-class>controller.addCategoryServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>logOutServlet</servlet-name>
+        <servlet-class>controller.logOutServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>loginServlet</servlet-name>
         <url-pattern>/loginServlet</url-pattern>
@@ -55,6 +59,10 @@
     <servlet-mapping>
         <servlet-name>addCategoryServlet</servlet-name>
         <url-pattern>/addCategoryServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>logOutServlet</servlet-name>
+        <url-pattern>/logOutServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

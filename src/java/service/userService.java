@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import model.User;
 
 
 /**
@@ -69,5 +70,25 @@ public class userService {
             return true;
         }
         return false;        
+    }
+    
+    public static User getUserByUsername(String userName) throws ClassNotFoundException, SQLException{
+        Connection conn = ConnectDB();
+        
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM User WHERE userName = ? ");
+        stmt.setString(1, userName);
+        ResultSet rs = stmt.executeQuery();
+        
+        
+         while(rs.next()){
+             int id = rs.getInt("id");
+             String name = rs.getString("name");
+             String username = rs.getString("userName");
+             String password = rs.getString("password");
+             String role = rs.getString("role");
+             User u = new User(id, name,username, password, role);
+             return u;
+        }
+        return null;     
     }
 }

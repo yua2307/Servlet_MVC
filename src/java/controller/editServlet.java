@@ -64,20 +64,42 @@ public class editServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-            int id = Integer.valueOf(request.getParameter("id"));
+          HttpSession session = request.getSession();
+           session.removeAttribute("message");
+         int id = Integer.valueOf(request.getParameter("id"));
         try {
-            
-            Product p = productService.getProductById(id);
-            List<Category> listCate = categoryService.getAllCategory();
-            
-            request.setAttribute("listCate", listCate);
-            request.setAttribute("pro", p);
-            request.getRequestDispatcher("updateProduct.jsp").forward(request, response);
-        } catch (SQLException ex) {
-            Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
+              String role = (String) request.getSession().getAttribute("role");
+        if(role.equalsIgnoreCase("")|| role == null){
+              response.sendRedirect("login.jsp");
         }
+        else
+        {
+              
+            try {
+
+                Product p = productService.getProductById(id);
+                List<Category> listCate = categoryService.getAllCategory();
+                
+                request.setAttribute("listCate", listCate);
+                request.setAttribute("pro", p);
+                request.getRequestDispatcher("updateProduct.jsp").forward(request, response);
+            } catch (SQLException ex) {
+                Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        } catch (NullPointerException e) {
+            
+          
+            response.sendRedirect("login.jsp");
+        }
+        
+      
+        
+        
+        
+       
             
     }
 
@@ -92,7 +114,7 @@ public class editServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-           HttpSession session = request.getSession();
+                HttpSession session = request.getSession();
         try {
             int id = Integer.valueOf(request.getParameter("id"));
              String productName = (String) request.getParameter("proName");

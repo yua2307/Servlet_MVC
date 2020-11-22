@@ -65,15 +65,32 @@ public class addServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+             session.removeAttribute("message");
+        
         try {
-            List<Category> listCate = categoryService.getAllCategory();
-            request.setAttribute("listCate", listCate);
-            request.getRequestDispatcher("addProduct.jsp").forward(request, response);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
+            String role = (String) request.getSession().getAttribute("role");
+        if (role.equalsIgnoreCase("") || role == null) {
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+        } else {
+            try {
+                List<Category> listCate = categoryService.getAllCategory();
+                request.setAttribute("listCate", listCate);
+                request.getRequestDispatcher("addProduct.jsp").forward(request, response);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException ex) {
+                Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+        } catch (NullPointerException e) {
+            
+            response.sendRedirect("login.jsp");
+        }
+        
+        
+        
+        
     }
 
     /**
@@ -89,7 +106,7 @@ public class addServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         try {
-      
+            
             String productName = (String) request.getParameter("proName");
             String des = (String) request.getParameter("description");
             int idCate = Integer.valueOf(request.getParameter("categoryId"));
