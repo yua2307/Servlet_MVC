@@ -7,7 +7,8 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.Category;
-import service.categoryService;
+import service.TCPService;
 
 /**
  *
@@ -62,13 +63,21 @@ public class listCategoryServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<Category> listCate = categoryService.getAllCategory();
+            List<Object> list = new ArrayList<Object>();
+            list.add("listCategory");
+            // send to Server
+            Socket socket = TCPService.writeObject(list, "localhost", 9000);
+            // receive from Server
+            List<Category> listCate = (List<Category>) TCPService.readObject(socket);
+            //List<Category> listCate = categoryService.getAllCategory();
             request.setAttribute("listCate", listCate);
             request.getRequestDispatcher("listCategory.jsp").forward(request, response);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(listCategoryServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(listCategoryServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(NullPointerException e){
+            System.out.println("Error : " + e.getMessage());
+            response.sendRedirect("403.jsp");
         }
     }
 

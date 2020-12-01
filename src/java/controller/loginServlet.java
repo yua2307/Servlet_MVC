@@ -7,7 +7,10 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -15,7 +18,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.User;
-import service.userService;
+import org.apache.tomcat.util.digester.ArrayStack;
+import service.TCPService;
 
 /**
  *
@@ -60,7 +64,8 @@ public class loginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect("login.jsp");
+        request.setAttribute("messageLogin", "You must login first");
+        request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
     /**
@@ -74,6 +79,8 @@ public class loginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+
        String username = (String) request.getParameter("username");
         System.out.println(username);
        String password = (String) request.getParameter("password");   
@@ -81,20 +88,45 @@ public class loginServlet extends HttpServlet {
 
        boolean check =false;
         try {
-             check = userService.checkLogin(username, password);
-              if(check){
-                        User userFind = userService.getUserByUsername(username);
-                        request.getSession().setAttribute("role",userFind.getRole());
-                        request.getRequestDispatcher("listServlet").forward(request, response);
-             }
-             else{
-                  request.setAttribute("message", "username or password not correct !!");
-                 request.getRequestDispatcher("login.jsp").forward(request, response);
+            List<String> listPara = new ArrayList<String>();
+            listPara.add(username);
+            listPara.add(password);
+            
+            
+            List<Object> sendToServer = new ArrayList<Object>();
+            sendToServer.add("loginServlet");
+            sendToServer.add(listPara);
+            // send To Server
+            Socket socket = TCPService.writeObject(sendToServer, "localhost", 9000);
+            // receive from Server
+            check = (boolean)TCPService.readObject(socket);
+            
+           //  check = userService.checkLogin(username, password);
+            if (check) {
+                List<Object> sendToServer2 = new ArrayList<Object>();
+                sendToServer2.add("getUserByUsername");
+                sendToServer2.add(username);
+                
+                // send To Server
+                Socket socket2 = TCPService.writeObject(sendToServer2, "localhost", 9000);
+                // receive from Server
+                 User userFind= (User) TCPService.readObject(socket2);
+           //     User userFind = userService.getUserByUsername(username);
+                request.getSession().setAttribute("role", userFind.getRole());
+                request.getSession().setAttribute("userNameForHello", userFind.getName());
+                response.sendRedirect("listServlet");
+            } else {
+                
+                 //  response.sendRedirect("login.jsp");
+                     request.setAttribute("message", "username or password not correct !!");
+                     request.getRequestDispatcher("login.jsp").forward(request, response);
             }
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(loginServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(loginServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NullPointerException e){
+            response.sendRedirect("403.jsp");
+        }catch(java.net.ConnectException e){
+              response.sendRedirect("403.jsp");
         }
        
       

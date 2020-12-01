@@ -7,14 +7,17 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import service.categoryService;
+import service.TCPService;
 
 /**
  *
@@ -76,14 +79,25 @@ public class addCategoryServlet extends HttpServlet {
         
         try {
             String cateName = request.getParameter("cateName");
-            boolean check = categoryService.addCategory(cateName);
+            
+            List<Object> list = new ArrayList<Object>();
+            list.add("addCategory");
+            list.add(cateName);
+            
+            //send to Server
+            Socket socket = TCPService.writeObject(list, "localhost", 9000);
+            // receive from server
+            boolean check = (boolean) TCPService.readObject(socket);
+            // boolean check = categoryService.addCategory(cateName);
             if(check){
                 response.sendRedirect("listCategoryServlet");
             }
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(addCategoryServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(addCategoryServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(NullPointerException e){
+            System.out.println("Error : " + e.getMessage());
+            response.sendRedirect("403.jsp");
         }
         
     }

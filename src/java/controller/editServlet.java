@@ -7,7 +7,11 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,8 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import model.Category;
 import model.Product;
-import service.categoryService;
-import service.productService;
+import service.TCPService;
 
 /**
  *
@@ -64,36 +67,55 @@ public class editServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-          HttpSession session = request.getSession();
-           session.removeAttribute("message");
-         int id = Integer.valueOf(request.getParameter("id"));
         try {
-              String role = (String) request.getSession().getAttribute("role");
-        if(role.equalsIgnoreCase("")|| role == null){
-              response.sendRedirect("login.jsp");
-        }
-        else
-        {
-              
+            HttpSession session = request.getSession();
+            session.removeAttribute("message");
+            int id = Integer.valueOf(request.getParameter("id"));
             try {
+                String role = (String) request.getSession().getAttribute("role");
+                if (role.equalsIgnoreCase("") || role == null) {
+                    response.sendRedirect("loginServlet");
+                } else {
 
-                Product p = productService.getProductById(id);
-                List<Category> listCate = categoryService.getAllCategory();
+                    try {
+                        
+                        Socket socket1 = TCPService.getConnection("localhost", 9000);
+                        HashMap<Integer, String> sendToClient = new HashMap<Integer, String>();
+                        sendToClient.put(id, "getProductById");
+                        // send to Server
+                        TCPService.writeObject(sendToClient,socket1);
+                        // receive from Server
+                        Product p = (Product) TCPService.readObject(socket1);
+                        
+                        
+                         Socket socket2 = TCPService.getConnection("localhost", 9000);
+                       // Product p = productService.getProductById(id);
+                        HashMap<Integer, String> sendToClient2 = new HashMap<Integer, String>();
+                        sendToClient2.put(0, "getAllCategory");
+                        
+                        // send to Server
+                       TCPService.writeObject(sendToClient2,socket2);
+                        // receive from Server
+                        List<Category> listCate = (List<Category>) TCPService.readObject(socket2);
+                       request.setAttribute("listCate", listCate);
+                        request.setAttribute("pro", p);
+                        request.getRequestDispatcher("updateProduct.jsp").forward(request, response);
+                   
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            } catch (NullPointerException e) {
                 
-                request.setAttribute("listCate", listCate);
-                request.setAttribute("pro", p);
-                request.getRequestDispatcher("updateProduct.jsp").forward(request, response);
-            } catch (SQLException ex) {
-                Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
+                response.sendRedirect("login.jsp");
             }
+        } catch (java.net.SocketException e) {
+            response.sendRedirect("403.jsp");
         }
-        } catch (NullPointerException e) {
-            
-          
-            response.sendRedirect("login.jsp");
-        }
+   
+        
+        
+        
         
       
         
@@ -114,17 +136,42 @@ public class editServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        try {
+            
+        
                 HttpSession session = request.getSession();
         try {
             int id = Integer.valueOf(request.getParameter("id"));
              String productName = (String) request.getParameter("proName");
             String des = (String) request.getParameter("description");
             int idCate = Integer.valueOf(request.getParameter("categoryId"));
-            Category cateFind = categoryService.getCategoryById(idCate);
+            
+            
+             // Send to Server 
+            
+            List<Object> list1 = new ArrayList<Object>();
+            list1.add("getCategoryById");
+            list1.add(idCate);
+            
+             // Send to Server 
+            
+            Socket socket1 = TCPService.writeObject(list1, "localhost", 9000);
+            
+            Category cateFind = (Category) TCPService.readObject(socket1);
+      //      Category cateFind = categoryService.getCategoryById(idCate);
               int quantity = Integer.valueOf(request.getParameter("quantity"));
             int unitPrice = Integer.valueOf(request.getParameter("unitPrice"));
             Product p = new Product(id, productName, des, quantity, unitPrice, cateFind);
-            boolean check = productService.updateProduct(p);
+            
+            
+            Socket socket2 = TCPService.getConnection("localhost", 9000);
+            List<Object> listToSend = new ArrayList<Object>();
+            listToSend.add("editProduct");
+            listToSend.add(p);
+            TCPService.writeObject(listToSend,socket2);
+            
+            boolean check = (boolean) TCPService.readObject(socket2);
             if(check){
                 session.setAttribute("message","Update Success" );
                 response.sendRedirect("listServlet");                
@@ -133,14 +180,19 @@ public class editServlet extends HttpServlet {
                 request.setAttribute("message", "Add Failed");
                 doGet(request, response);
             } 
-                   
-            
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(editServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         }
-          
+        catch (java.net.SocketException e) {
+            response.sendRedirect("403.jsp");
+        }
+             
+        catch(NullPointerException e){
+             System.out.println("Error :" + e.getMessage());
+             response.sendRedirect("403.jsp");
+        }
+        
     }
 
     /**

@@ -7,7 +7,10 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -15,7 +18,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import service.productService;
+import service.TCPService;
 
 /**
  *
@@ -66,13 +69,23 @@ public class deleteProductServlet extends HttpServlet {
             
              String role = (String) session.getAttribute("role");
              if(role.equalsIgnoreCase("")|| role == null){
-              response.sendRedirect("login.jsp");
+              response.sendRedirect("loginServlet");
             }
             int id = Integer.valueOf(request.getParameter("id"));
 
             boolean check;
             try {
-                check = productService.deleteProduct(id);
+               
+                List<Object> sendToServer = new ArrayList<Object>();
+                sendToServer.add("deleteProduct");
+                sendToServer.add(id);
+                // send 
+                Socket socket = TCPService.getConnection("localhost", 9000);
+                TCPService.writeObject(sendToServer,socket);
+                 // receive
+                 check = (boolean)TCPService.readObject(socket);
+                 
+               // check = productService.deleteProduct(id);
                 if (check) {
                     session.setAttribute("message", "Delete Success");
                     response.sendRedirect("listServlet");
@@ -82,12 +95,12 @@ public class deleteProductServlet extends HttpServlet {
                 }
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(deleteProductServlet.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SQLException ex) {
-                Logger.getLogger(deleteProductServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
-        
         } catch (NullPointerException e) {
             response.sendRedirect("login.jsp");
+        }
+        catch(Exception e){
+            System.out.println("Error : "+ e.getMessage());
         }
 
        

@@ -140,6 +140,12 @@
         <div class="container-fluid">
             <div class="block-header align-center">
                 <h2>Product Manage</h2>
+                <c:choose>
+                    <c:when test="${sessionScope.userNameForHello != null}">
+                        <h2> Hello ${sessionScope.userNameForHello}</h2>
+                    </c:when>
+                </c:choose>
+           
             </div>
             <!-- Basic Table -->
             <div class="row clearfix">

@@ -8,7 +8,11 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,8 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import model.Category;
 import model.Product;
-import service.categoryService;
-import service.productService;
+import service.TCPService;
 
 /**
  *
@@ -44,7 +47,7 @@ public class addServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet addServlet</title>");            
+            out.println("<title>Servlet addServlet</title>");
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>Servlet addServlet at " + request.getContextPath() + "</h1>");
@@ -65,32 +68,39 @@ public class addServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession();
-             session.removeAttribute("message");
-        
+
         try {
-            String role = (String) request.getSession().getAttribute("role");
-        if (role.equalsIgnoreCase("") || role == null) {
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-        } else {
+            HttpSession session = request.getSession();
+            session.removeAttribute("message");
+
             try {
-                List<Category> listCate = categoryService.getAllCategory();
-                request.setAttribute("listCate", listCate);
-                request.getRequestDispatcher("addProduct.jsp").forward(request, response);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SQLException ex) {
-                Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
+                String role = (String) request.getSession().getAttribute("role");
+                if (role.equalsIgnoreCase("") || role == null) {
+                    response.sendRedirect("loginServlet");
+                } else {
+                    try {
+                        Socket socket = TCPService.getConnection("localhost", 9000);
+                        HashMap<Integer, String> sendToServer = new HashMap<Integer, String>();
+                        sendToServer.put(0, "getAllCategory");
+
+                        // send to Server
+                        TCPService.writeObject(sendToServer, socket);
+                        List<Category> listCate = (List<Category>) TCPService.readObject(socket);
+                        //  List<Category> listCate = categoryService.getAllCategory();
+                        request.setAttribute("listCate", listCate);
+                        request.getRequestDispatcher("addProduct.jsp").forward(request, response);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
+
+                    }
+                }
+            } catch (NullPointerException e) {
+                response.sendRedirect("login.jsp");
             }
+        } catch (Exception e) {
+            response.sendRedirect("403.jsp");
         }
-        } catch (NullPointerException e) {
-            
-            response.sendRedirect("login.jsp");
-        }
-        
-        
-        
-        
+
     }
 
     /**
@@ -106,31 +116,56 @@ public class addServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         try {
-            
+
             String productName = (String) request.getParameter("proName");
             String des = (String) request.getParameter("description");
             int idCate = Integer.valueOf(request.getParameter("categoryId"));
-            Category cateFind = categoryService.getCategoryById(idCate);
+
+            // Send to Server 
+            List<Object> list1 = new ArrayList<Object>();
+            list1.add("getCategoryById");
+            list1.add(idCate);
+
+            // Send to Server 
+            Socket socket1 = TCPService.writeObject(list1, "localhost", 9000);
+
+            Category cateFind = (Category) TCPService.readObject(socket1);
+
+            //Category cateFind = categoryService.getCategoryById(idCate);
             int quantity = Integer.valueOf(request.getParameter("quantity"));
             int unitPrice = Integer.valueOf(request.getParameter("unitPrice"));
             Product p = new Product(productName, des, quantity, unitPrice, cateFind);
-            boolean check = productService.addProduct(p);
-            if(check){
-              request.setAttribute("message","Add Success" );
-              response.sendRedirect("listServlet");
-            }
-            else {
+
+            // Send to Server 
+            Socket socket2 = TCPService.getConnection("localhost", 9000);
+            List<Object> list = new ArrayList<Object>();
+            list.add("addProduct");
+            list.add(p);
+
+            TCPService.writeObject(list, socket2);
+            // receive from Server 
+
+            boolean check = (boolean) TCPService.readObject(socket2);
+
+            //boolean check = productService.addProduct(p);
+            if (check) {
+                session.setAttribute("message", "Add Success");
+                response.sendRedirect("listServlet");
+            } else {
                 session.setAttribute("message", "Add Failed");
                 doGet(request, response);
             }
-            
+
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-       
-        
+        } 
+        catch (NullPointerException e) {
+            System.out.println("Error : " + e.getMessage());
+            response.sendRedirect("403.jsp");
+        }catch (NumberFormatException e) {
+            response.sendRedirect("listServlet");
+        } 
+
 //        try {
 //            Category cate = categoryService.getCategoryById(idCate);
 //            Product p = new Product(productName, des, quantity, unitPrice, cate);
@@ -143,7 +178,6 @@ public class addServlet extends HttpServlet {
 //            Logger.getLogger(addServlet.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //       
-    
     }
 
     /**

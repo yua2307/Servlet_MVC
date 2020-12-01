@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.Product;
-import service.productService;
+import service.TCPService;
 
 /**
  *
@@ -65,34 +65,48 @@ public class listServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+//        try {
+//            
+//            List<Product> list = productService.getAllProduct();
+//            request.setAttribute("list", list);
+//            request.getRequestDispatcher("listProduct.jsp").forward(request, response);
+//            request.getSession().removeAttribute("message");
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        
+          
         try {
             
-            List<Product> list = productService.getAllProduct();
-            request.setAttribute("list", list);
-            request.getRequestDispatcher("listProduct.jsp").forward(request, response);
-            request.getSession().removeAttribute("message");
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-//            HashMap<String, Integer> sendToClient = new HashMap<String, Integer>();
-//            sendToClient.put("listAllProduct", 0);
+            
+             HashMap<Integer, String> sendToClient = new HashMap<Integer, String>();
+            sendToClient.put(0,"listAllServlet");
 //             Socket socket = new Socket("localhost", 9000);
 //            ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
 //            ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
-//            
-//            // to TCP Server 
-//            os.writeObject(sendToClient);
-//        try {
-//            // receive from Server
-//            List<Product> list = (List<Product>) is.readObject();
-//            request.setAttribute("list", list);
-//            request.getRequestDispatcher("listProduct.jsp").forward(request, response);
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+            
+            Socket socket = TCPService.getConnection("localhost", 9000);
+            // to TCP Server 
+            TCPService.writeObject(sendToClient,socket);
+            // receive from Server
+            List<Product> list = (List<Product>) TCPService.readObject(socket);
+            request.setAttribute("list", list);
+            request.getRequestDispatcher("listProduct.jsp").forward(request, response);
+            request.getSession().removeAttribute("message");
+        } 
+        catch (ClassNotFoundException ex) {
+            Logger.getLogger(listServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(java.net.SocketException e){
+             System.out.println("Error :" + e.getMessage());
+             response.sendRedirect("403.jsp");
+        }
+        catch(NullPointerException e){
+             System.out.println("Error :" + e.getMessage());
+             response.sendRedirect("403.jsp");
+        }
     }
 
     /**

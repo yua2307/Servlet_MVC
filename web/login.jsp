@@ -141,7 +141,15 @@
             </div>
         </form>
         <p style="color:red">${message}</p>
-        <p> da , username la yua2307 va pass la 123456 nha thay ^^ </p>
+        <h1 style="display:none" id="messagesError">${messageLogin}</h1> 
 
     </body>
+    
+     <script type="text/javascript">
+          window.onload = function(){ 
+               var avai = document.getElementById("messagesError").textContent;
+               var check = avai.localeCompare("You must login first");
+               if (check==0) alert(avai); 
+           }
+</script>
 </html>

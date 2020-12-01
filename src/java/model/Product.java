@@ -5,11 +5,17 @@
  */
 package model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author macbookpro
  */
-public class Product {
+public class Product implements Serializable {
+    
+    
+     private static final long serialVersionUID =1L;
+     
     private int id;
     private String name;
     private String des;
@@ -25,6 +31,14 @@ public class Product {
         this.category = category;
     }
     
+    
+      public Product(int id, String name, String des, int quantity, int unitPrice) {
+        this.id = id;
+        this.name = name;
+        this.des = des;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+    }
     
     
     public Product(int id, String name, String des, int quantity, int unitPrice, Category category) {
@@ -83,10 +97,6 @@ public class Product {
     public void setCategory(Category category) {
         this.category = category;
     }
-
-    
-
-  
     
     
 }

@@ -55,7 +55,9 @@ public class logOutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         request.getSession().removeAttribute("role");
+        request.getSession().removeAttribute("userNameForHello");
         response.sendRedirect("listServlet");
     }
 

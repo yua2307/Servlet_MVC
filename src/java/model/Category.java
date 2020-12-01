@@ -5,11 +5,17 @@
  */
 package model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author macbookpro
  */
-public class Category {
+public class Category implements Serializable {
+    
+    private static final long serialVersionUID =1L;
+    
+    
     private int idCate;
     private String cateName;
 
