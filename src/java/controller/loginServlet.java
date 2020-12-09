@@ -64,8 +64,10 @@ public class loginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("messageLogin", "You must login first");
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+       // request.setAttribute("messageLogin", "You must login first");
+      //  request.getRequestDispatcher("login.jsp").forward(request, response);
+      response.sendRedirect("login.jsp");
+      request.getSession().removeAttribute("messageLogin");
     }
 
     /**

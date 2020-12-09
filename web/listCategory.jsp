@@ -1,3 +1,5 @@
+<%@page import="model.Category"%>
+<%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>  
@@ -158,12 +160,22 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <c:forEach var="temp" items="${listCate}">
-                                        <tr>
-                                             <td style="text-align: center">${temp.idCate}</td>
-                                             <td style="text-align: center">${temp.cateName} </td>
-                                    </tr>
-                                    </c:forEach>
+                                    
+                                     <% 
+                                        ArrayList<Category> listCate = (ArrayList<Category>) request.getAttribute("listCate");
+                                        for(int i = 0;i<listCate.size();i++){
+                                          
+                                    %>
+                                         <tr>
+                                             <td style="text-align: center"><%=listCate.get(i).getIdCate()%></td>
+                                             <td style="text-align: center"><%=listCate.get(i).getCateName()%></td>
+                                        </tr>
+                                    
+                                    <%
+                                        }
+                                    %>
+                                  
+             
                                 </tbody>
                             </table>
                             

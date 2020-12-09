@@ -80,7 +80,6 @@ public class listServlet extends HttpServlet {
           
         try {
             
-            
              HashMap<Integer, String> sendToClient = new HashMap<Integer, String>();
             sendToClient.put(0,"listAllServlet");
 //             Socket socket = new Socket("localhost", 9000);

@@ -62,7 +62,20 @@ public class addCategoryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect("addCategory.jsp");
+        
+        try {
+            String role = (String) request.getSession().getAttribute("role");
+                if (role.equalsIgnoreCase("") || role == null) {
+                    request.getSession().setAttribute("messageLogin", "You must login first");
+                    response.sendRedirect("loginServlet");
+                }
+                else {
+                        response.sendRedirect("addCategory.jsp");
+                }
+        } catch (NullPointerException e) {  
+                response.sendRedirect("login.jsp");
+         }     
+    
     }
 
     /**

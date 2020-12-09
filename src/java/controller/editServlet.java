@@ -74,8 +74,13 @@ public class editServlet extends HttpServlet {
             try {
                 String role = (String) request.getSession().getAttribute("role");
                 if (role.equalsIgnoreCase("") || role == null) {
+                    request.getSession().setAttribute("messageLogin", "You must login first");
                     response.sendRedirect("loginServlet");
-                } else {
+                }else if(role.equalsIgnoreCase("employee")) {
+                    request.getSession().setAttribute("messageLogin", "You muse have permission : Admin");
+                    response.sendRedirect("loginServlet");
+                } 
+                else {
 
                     try {
                         

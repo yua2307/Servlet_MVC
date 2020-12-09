@@ -69,6 +69,7 @@ public class deleteProductServlet extends HttpServlet {
             
              String role = (String) session.getAttribute("role");
              if(role.equalsIgnoreCase("")|| role == null){
+              request.getSession().setAttribute("messageLogin", "You must login first");
               response.sendRedirect("loginServlet");
             }
             int id = Integer.valueOf(request.getParameter("id"));

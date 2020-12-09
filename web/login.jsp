@@ -141,7 +141,7 @@
             </div>
         </form>
         <p style="color:red">${message}</p>
-        <h1 style="display:none" id="messagesError">${messageLogin}</h1> 
+        <h1 style="display:none" id="messagesError">${sessionScope.messageLogin}</h1> 
 
     </body>
     
@@ -149,7 +149,8 @@
           window.onload = function(){ 
                var avai = document.getElementById("messagesError").textContent;
                var check = avai.localeCompare("You must login first");
-               if (check==0) alert(avai); 
+               var check4 = avai.localeCompare("You muse have permission : Admin");
+               if (check==0 || check4==0) alert(avai); 
            }
 </script>
 </html>

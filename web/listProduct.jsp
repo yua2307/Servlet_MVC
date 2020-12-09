@@ -1,3 +1,6 @@
+<%@page import="java.text.DecimalFormat"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="model.Product"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>  
@@ -143,6 +146,7 @@
                 <c:choose>
                     <c:when test="${sessionScope.userNameForHello != null}">
                         <h2> Hello ${sessionScope.userNameForHello}</h2>
+                        <h2> Permission ${sessionScope.role}</h2>
                     </c:when>
                 </c:choose>
            
@@ -152,18 +156,24 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="card">
                         
-                        <c:choose>
-                            <c:when test="${sessionScope.role != null}">
-                                <div class="header">
-                                    <a style="margin-left:90%" href="logOutServlet" class="btn btn-success waves-effect">Log Out</a>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="header">
+        
+                        
+                        <% 
+                            String role = (String) request.getSession().getAttribute("role");
+                            if(role==null || role.equals("")){
+                        %>
+                            <div class="header">
                                     <a style="margin-left:5%" href="loginServlet" class="btn btn-success waves-effect">Login</a>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
+                            </div>
+                        <%
+                            } else {
+                        %>
+                             <div class="header">
+                                    <a style="margin-left:90%" href="logOutServlet" class="btn btn-success waves-effect">Log Out</a>
+                             </div>
+                        <%
+                            }
+                        %>
                         <div class="body table-responsive">
                             <table class="table table-bordered table-striped">
                                 <thead class="btn-success">
@@ -178,22 +188,34 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <c:forEach var="temp" items="${list}">
-                                        <tr>  
-                                             <td>${temp.id}</td>
-                                             <td style="text-align: center">${temp.name} </td>
-                                    <td style="text-align: center">${temp.des}</td>
-                                    <td style="text-align: center">${temp.category.getCateName()}</td>
-                                    <td style="text-align: center">${temp.quantity}</td>
-                                    <td style="text-align: center"><fmt:formatNumber  pattern="VND #,###.##;VND -#,###.##" value="${temp.unitPrice}" type="currency" currencySymbol="VND"/></td>
                                     
-                                    <td>
-                                        <a href="editServlet?id=${temp.id}" class="btn btn-info"><i class="material-icons">edit</i></a>
-                                        <a href="deleteProductServlet?id=${temp.id}" class="btn btn-danger btn-delete" onclick="if (!(confirm('Are you sure you want to delete this Product?')))
+                                    <% 
+                                        ArrayList<Product> listProduct = (ArrayList<Product>) request.getAttribute("list");
+                                           DecimalFormat formatter = new DecimalFormat("###,###,###");
+                                        for(int i = 0;i<listProduct.size();i++){
+                                         
+                                    %>
+                                    <tr>
+                                        <td style="text-align: center"><%=listProduct.get(i).getId()%></td>
+                                          <td style="text-align: center"><%=listProduct.get(i).getName()%></td>
+                                        <td style="text-align: center"><%=listProduct.get(i).getDes()%></td>
+                                        <td style="text-align: center"><%=listProduct.get(i).getCategory().getCateName()%></td>
+                                        <td style="text-align: center"><%=listProduct.get(i).getQuantity()%></td>
+                                        <td style="text-align: center"><%=formatter.format(listProduct.get(i).getUnitPrice())+" VNĐ"%></td>
+                                        <td>
+                                            <a href="editServlet?id=<%=listProduct.get(i).getId()%>" class="btn btn-info"><i class="material-icons">edit</i></a>
+                                            <a href="deleteProductServlet?id=<%=listProduct.get(i).getId()%>" class="btn btn-danger btn-delete" onclick="if (!(confirm('Are you sure you want to delete this Product?')))
                                                                 return false" ><i class="material-icons">delete</i> </a>
-                                    </td>
+                                        </td>
+                                        
+                                      
                                     </tr>
-                                    </c:forEach>
+
+                                    <% 
+                                        } 
+ 
+                                    %>
+                       
                                 </tbody>
                             </table>
                             
@@ -233,7 +255,8 @@
                var check1 = avai.localeCompare("Add Success");
                var check2 = avai.localeCompare("Update Success");
                var check3 = avai.localeCompare("Delete Success");
-               if (check1==0 || check2==0 || check3 == 0 ) alert(avai); 
+               var check4 = avai.localeCompare("You muse have permission : Admin");
+               if (check1==0 || check2==0 || check3 == 0 || check4==0) alert(avai); 
                     //alert("${message}");
            }
 </script>

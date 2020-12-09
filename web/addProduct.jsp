@@ -1,3 +1,5 @@
+<%@page import="model.Category"%>
+<%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>  
@@ -86,42 +88,42 @@
             <aside id="leftsidebar" class="sidebar">
                 <!--             Menu -->
                 <div class="menu">
-                <ul class="list">
-                    <li class="header">MENU</li>
-                    <li>
-                        <a href="listServlet">
-                            <span>Home</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="javascript:void(0);" class="menu-toggle">
-                            <span>Product Manager</span>
-                        </a>
-                        <ul class="ml-menu">
-                            <li>
-                                <a href="addServlet">Add Product</a>
-                            </li>
-                            <li>
-                                <a href="listServlet">List Product</a>
-                            </li>
-                           
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="javascript:void(0);" class="menu-toggle">
-                            <span>Category Manager</span>
-                        </a>
-                        <ul class="ml-menu">
-                            <li>
-                                <a href="addCategoryServlet">Add Category</a>
-                            </li>
-                            <li>
-                                <a href="listCategoryServlet">List Category</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+                    <ul class="list">
+                        <li class="header">MENU</li>
+                        <li>
+                            <a href="listServlet">
+                                <span>Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);" class="menu-toggle">
+                                <span>Product Manager</span>
+                            </a>
+                            <ul class="ml-menu">
+                                <li>
+                                    <a href="addServlet">Add Product</a>
+                                </li>
+                                <li>
+                                    <a href="listServlet">List Product</a>
+                                </li>
+
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);" class="menu-toggle">
+                                <span>Category Manager</span>
+                            </a>
+                            <ul class="ml-menu">
+                                <li>
+                                    <a href="addCategoryServlet">Add Category</a>
+                                </li>
+                                <li>
+                                    <a href="listCategoryServlet">List Category</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
                 <!--             #Menu 
                              Footer -->
                 <div class="legal">
@@ -141,7 +143,7 @@
                 <h2>Add Product</h2>
             </div>
             <!-- Horizontal Layout -->
-           
+
             <div class="row clearfix">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="card">
@@ -179,11 +181,17 @@
                                         <div class="form-group">
                                             <div class="form-line">
                                                 <select name="categoryId">
-                                                    <c:forEach var="temp" items="${listCate}">
-                                                    <option value="${temp.idCate}">
-                                                        ${temp.cateName}
-                                                    </option>
-                                                    </c:forEach>
+                                                    <%
+                                                        ArrayList<Category> listCate = (ArrayList<Category>) request.getAttribute("listCate");
+                                                        for (int i = 0; i < listCate.size(); i++) {
+
+                                                    %>
+                                                        <option value="<%=listCate.get(i).getIdCate()%>">
+                                                            <%=listCate.get(i).getCateName()%>
+                                                        </option>
+                                                    <%
+                                                        }
+                                                    %>
                                                 </select>
                                             </div>
                                         </div>
@@ -226,7 +234,7 @@
             </div>
             <!-- #END# Horizontal Layout -->
         </section>
-       
+
         <script src="<c:url value="https://code.jquery.com/jquery-3.2.1.slim.min.js" />"></script>
         <script src="<c:url value="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" />"></script>
         <script src="<c:url value="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js" />"></script>
